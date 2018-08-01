@@ -16,6 +16,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".TakeASelfie" />
+        <activity android:name=".EmotionGraph"></activity>
     </application>
 
 </manifest>
