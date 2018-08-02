@@ -1,15 +1,14 @@
 package com.android.hh6.healhero6android;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.StrictMode;
-import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +17,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,6 +40,8 @@ import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 public class TakeASelfie extends AppCompatActivity implements View.OnClickListener{
 
 
+    private static final int CAMERA_REQUEST = 1888;
+    private static final int MY_CAMERA_PERMISSION_CODE = 1999;
 
     private ImageView imageView; // variable to hold the image view in our activity_main.xml
     private TextView resultText; // variable to hold the text view in our activity_main.xml
@@ -47,7 +49,6 @@ public class TakeASelfie extends AppCompatActivity implements View.OnClickListen
     private Button btnCamera;   // button to open camera
     private Button btnEmotion;  // button to send emotion recognition request
 
-    private static final int RESULT_LOAD_IMAGE  = 100;
     private static final int REQUEST_PERMISSION_CODE = 200;
 
 
@@ -79,37 +80,25 @@ public class TakeASelfie extends AppCompatActivity implements View.OnClickListen
 
     // when the "GET IMAGE" Button is clicked this function is called
     public void getImage(View view) {
-        // check if user has given us permission to access the gallery
-        if(checkPermission()) {
-            Intent choosePhotoIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            startActivityForResult(choosePhotoIntent, RESULT_LOAD_IMAGE);
-        }
-        else {
-            requestPermission();
+        // check if user has given us permission to access the camera
+        if (checkSelfPermission(Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA},
+                    MY_CAMERA_PERMISSION_CODE);
+        } else {
+            Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+            startActivityForResult(cameraIntent, CAMERA_REQUEST);
         }
     }
 
-
-    // This function gets the selected picture from the gallery and shows it on the image view
+    //result of the camera (aphoto)
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-
-        // get the photo URI from the gallery, find the file path from URI and send the file path to ConfirmPhoto
-        if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && null != data) {
-
-
-            Uri selectedImage = data.getData();
-            String[] filePathColumn = { MediaStore.Images.Media.DATA };
-            Cursor cursor = getContentResolver().query(selectedImage,filePathColumn, null, null, null);
-            cursor.moveToFirst();
-            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-            // a string variable which will store the path to the image in the gallery
-            String picturePath= cursor.getString(columnIndex);
-            cursor.close();
-            Bitmap bitmap = BitmapFactory.decodeFile(picturePath);
-            imageView.setImageBitmap(bitmap);
+        if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
+            Bitmap photo = (Bitmap) data.getExtras().get("data");
+            imageView.setImageBitmap(photo);
         }
     }
+
 
 
     // convert image to base 64 so that we can send the image to Emotion API
@@ -254,10 +243,6 @@ public class TakeASelfie extends AppCompatActivity implements View.OnClickListen
             return name + ": " + Double.toString(obj.getDouble(name)*100) + " %\n";
         }
     }
-
-
-
-
 
 }
 
