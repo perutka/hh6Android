@@ -181,9 +181,13 @@ public class TakeASelfie extends AppCompatActivity implements View.OnClickListen
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
 
-
             try {
-                URIBuilder builder = new URIBuilder("https://westeurope.api.cognitive.microsoft.com/face/v1.0");
+
+                URIBuilder builder = new URIBuilder("https://westeurope.api.cognitive.microsoft.com/face/v1.0/detect");
+
+                builder.setParameter("returnFaceId", "true");
+                builder.setParameter("returnFaceLandmarks", "false");
+                builder.setParameter("returnFaceAttributes", "emotion");
 
 
                 URI uri = builder.build();
@@ -225,7 +229,8 @@ public class TakeASelfie extends AppCompatActivity implements View.OnClickListen
                 // get the scores object from the results
                 for(int i = 0;i<jsonArray.length();i++) {
                     JSONObject jsonObject = new JSONObject(jsonArray.get(i).toString());
-                    JSONObject scores = jsonObject.getJSONObject("scores");
+                    JSONObject eJson = jsonObject.getJSONObject("faceAttributes").getJSONObject("emotion");
+                    /*
                     double max = 0;
                     String emotion = "";
                     for (int j = 0; j < scores.names().length(); j++) {
@@ -235,12 +240,15 @@ public class TakeASelfie extends AppCompatActivity implements View.OnClickListen
                         }
                     }
                     emotions += emotion + "\n";
+                    */
+
+                    String emotion = eJson.toString();
                 }
                 resultText.setText(emotions);
 
 
             } catch (JSONException e) {
-                resultText.setText(e.getMessage() + result);
+                resultText.setText("error: " + e.getMessage() + ";   " + result);
             }
         }
     }
