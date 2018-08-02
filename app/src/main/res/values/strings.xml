@@ -3,4 +3,5 @@
     <string name="btnSelfie">Camera</string>
     <string name="btnEmotion">Get emotion</string>
     <string name="txtEmotionGraph">Emotion graph</string>
+    <string name="txtResult">Result...</string>
 </resources>

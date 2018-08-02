@@ -44,8 +44,8 @@ public class TakeASelfie extends AppCompatActivity implements View.OnClickListen
     private ImageView imageView; // variable to hold the image view in our activity_main.xml
     private TextView resultText; // variable to hold the text view in our activity_main.xml
 
-    private Button btnCamera;
-    private Button btnEmotion;
+    private Button btnCamera;   // button to open camera
+    private Button btnEmotion;  // button to send emotion recognition request
 
     private static final int RESULT_LOAD_IMAGE  = 100;
     private static final int REQUEST_PERMISSION_CODE = 200;
@@ -143,13 +143,10 @@ public class TakeASelfie extends AppCompatActivity implements View.OnClickListen
                 getImage(view);
                 break;
             }
-
             case R.id.btnEmotion: {
                 getEmotion(view);
                 break;
             }
-
-            //.... etc
         }
     }
 
@@ -213,8 +210,6 @@ public class TakeASelfie extends AppCompatActivity implements View.OnClickListen
             catch (Exception e){
                 return "null";
             }
-
-
         }
 
 
@@ -230,19 +225,15 @@ public class TakeASelfie extends AppCompatActivity implements View.OnClickListen
                 for(int i = 0;i<jsonArray.length();i++) {
                     JSONObject jsonObject = new JSONObject(jsonArray.get(i).toString());
                     JSONObject eJson = jsonObject.getJSONObject("faceAttributes").getJSONObject("emotion");
-                    /*
-                    double max = 0;
-                    String emotion = "";
-                    for (int j = 0; j < scores.names().length(); j++) {
-                        if (scores.getDouble(scores.names().getString(j)) > max) {
-                            max = scores.getDouble(scores.names().getString(j));
-                            emotion = scores.names().getString(j);
-                        }
-                    }
-                    emotions += emotion + "\n";
-                    */
 
-                    String emotion = eJson.toString();
+                    emotions = elementToString(eJson,"anger") +
+                            elementToString(eJson,"contempt") +
+                            elementToString(eJson,"disgust") +
+                            elementToString(eJson,"fear") +
+                            elementToString(eJson,"happiness") +
+                            elementToString(eJson,"neutral") +
+                            elementToString(eJson,"sadness") +
+                            elementToString(eJson,"surprise");
                 }
                 resultText.setText(emotions);
 
@@ -250,6 +241,17 @@ public class TakeASelfie extends AppCompatActivity implements View.OnClickListen
             } catch (JSONException e) {
                 resultText.setText("error: " + e.getMessage() + ";   " + result);
             }
+        }
+
+        /**
+         * Takes jsonObject and parses out one element of the object. The element must be double.
+         * @param obj
+         * @param name
+         * @return string presenting the element. example: happiness: 95%
+         * @throws JSONException
+         */
+        private String elementToString(JSONObject obj, String name) throws JSONException {
+            return name + ": " + Double.toString(obj.getDouble(name)*100) + " %\n";
         }
     }
 
